@@ -1,0 +1,114 @@
+Sub Select_one_cell()
+    Range("a1").Select
+    Cells(1, 1).Select
+    'az1셀 선택
+    'ctrl+g는 콘솔창으로 이동
+    '? range("az1").column : az1의 열번호를 알려줌
+    Cells(1, 52).Select
+    Cells(1, "az").Select
+    
+    '변수 이용
+    Dim cn As Long
+    cn = 7
+    
+    'a7셀을 선택
+    Range("a" & cn).Select
+    Cells(cn, "a").Select
+    
+    '자동구성원 목록이 안뜨는 경우 객체로 선언한 후 이용하면 편하다.
+    Dim c As Range
+    Set c = Cells(1, "a")
+    c.Select
+End Sub
+
+Sub using_End_select_cell()
+    Range("a1").End(xlDown).Select  'a1에서 데이터가 있는 마지막 행의 셀까지 아래로 이동
+    Range("b1").End(xlDown).Select  'b5에 멈춤
+    Cells(Rows.Count, "b").End(xlUp).Select 'b열의 제일 마지막 행의 셀(1048576)이 선택되고 해당 셀을 기준으로 올라갔을 때, 데이터가 있는 첫번째 셀로 이동한다.
+    Range("a1").End(xlToRight).Select   'a1에서 데이터가 있는 마지막 행의 셀까지 오른쪽으로 이동
+    Range("a4").End(xlToLeft).Select
+End Sub
+
+Sub total_row_column()
+    Columns(2).Select   '2번째 열 선택
+    Columns("b").Select
+    Rows(4).Select  '4번째 행 선택
+    
+    Range("a1").EntireColumn.Select '해당 셀이 포함된 열을 전체 선택
+    Range("b6").EntireRow.Select    '해당 셀이 포함된 행을 전체 선택
+    
+    Dim rng As Range
+    Set rng = Range("a1:d10")
+    rng.Select  '해당 범위 내의 셀을 모두 선택
+    
+    '행의 갯수를 알려줌
+    rn = rng.Rows.Count
+    MsgBox rn
+End Sub
+
+Sub offset_property()
+    '기본 문법: 기준셀.offset(행, 열) 기준셀에서 아래방향으로 행만큼, 오른쪽 방향으로 열만큼 이동해
+    'Range("b5").Offset(, -2).Select  '0은 생략가능, 왼쪽으로 이동은 음의 부호를 붙힌다.
+    'Cells(Rows.Count, "c").End(xlUp).Select '데이터를 누적할 때 사용하며 활용도가 높다.
+    
+    '116보다 큰 값을 F열에 하나씩 누적하기
+    For Each c In Range("c1:c10")
+        If c > 116 Then
+            Cells(Rows.Count, "f").End(3)(2) = c
+            End If
+    Next
+End Sub
+
+Sub 셀범위선택1()
+    Range("a1", Cells(Rows.Count, "c").End(xlUp).Offset(, 1)).Select    '강추!!!!
+    
+    Dim c As Long
+    c = Range("a1").End(xlDown).Row
+    Range("a1:d" & c).Select
+    
+    Range("a1").CurrentRegion.Select    'CurrentRegion의 기준이 되는 객체는 반드시 셀이여야한다.
+    Worksheets(1).UsedRange.Select      'UsedRange의 기준이 되는 객체는 반드시 워크시트이여야한다. 워크시트에서 사용 중인 모든 영역을 선택할 때 유용
+End Sub
+
+Sub 셀범위선택2()
+    '기준개체.resize(행,열)
+    Dim rng As Range
+    Set rng = Range("a1").CurrentRegion
+    rng.Resize(2, 3).Select
+    rng.Resize(, 3).Select  '=rng.resize(rng.rows.count, 3).select
+    
+    '늘어나거나 줄어들거 감안해서 코딩하기
+    Dim cn As Long
+    cn = Cells(1, Columns.Count).End(xlToLeft).Column
+    rng.Offset(1).Resize(rng.Rows.Count - 1, cn).Select
+End Sub
+
+Sub 셀범위선택_union()
+    Application.Union(Columns("b"), Columns("d")).Select    'application은 생략 가능하다.
+    '4,6을 제외한 숫자만 선택
+    Dim c, r As Range
+    For Each c In Range("a1:a10")
+        If c = 4 Or c = 6 Then
+        Else
+            'r에 아무것도 없으면 값을 대입, 있으면 union으로 붙히기
+            If r Is Nothing Then
+                Set r = c
+            Else
+                Set r = Union(r, c)
+            End If
+        End If
+    Next
+    If r Is Nothing = 0 Then r.Select   'r이 false가 아니면 해당되는 값을 고르겠다.
+End Sub
+
+Sub 셀범위선택_specialcells()
+    '기준개체.specialcells(옵션)
+    Dim rng As Range
+    Set rng = Range("a1").CurrentRegion
+    rng.SpecialCells(xlCellTypeBlanks) = "*"    '빈 셀 찾기
+    rng.SpecialCells(xlcelltypefomulas, xlErrors) = ""  ' 오류가 있는 셀 빈 값으로 바꾸기
+    
+    On Error Resume Next    '이 코드 아래에 에러가 생기면 무시하고 다음 코드를 시작해라.
+    rng.SpecialCells(xlCellTypeFormulas).Select '수식이 있는 셀을 고른다.
+    On Error GoTo 0 '오류를 초기화한다.
+End Sub

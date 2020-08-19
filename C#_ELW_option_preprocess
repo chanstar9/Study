@@ -1,0 +1,68 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+
+namespace ConsoleApp1
+{
+  class ELW_Option_data_preprocess
+  {
+      static void Main()
+      {
+          string[] lines = File.ReadAllLines(@"C:\\User\\SE20060\\업무~\\20200813_060412_All.txt");
+          
+          //T1
+          List<List<string>> T1_ticks = new List<List<string>>();
+          StreamWriter writer1 = new StreamWriter("C:\\User\\SE20060\\업무~\\최찬규1.csv");
+          foreach (string line in lines)
+          {
+              int position = line.IndeOf("[");
+              if ((line.Contains("KRA5731BZA10"))||(line.Contains("KR4201Q83259")))
+              {
+                  if ((line.Substring(position + 6, 12) == "KRA5731BZA10")||(line.Substring(position + 6, 12) == "KR4201Q83259"))
+                  {
+                      List<string> lst = new List<string>();
+                      lst = new List<string> { line.Substring(0, position - 1), line.Substring(position + 1, 5), line.Substring(position + 6, 12), line.Substring(position + 18) };
+                      T1_ticks.Add(lst);
+                      string wr1 = lst[0] + "," + lst[1] + "," + lst[2] + "," + lst[3];
+                      writer1.Flush();
+                      writer1.WriteLine(wr1);
+                  }
+              }
+          }
+          
+          //T2
+          StreamWriter writer2 = new StreamWriter("C:\\User\\SE20060\\업무~\\최찬규2.csv");
+          List<List<string>> T2_ticks = new List<List<string>>();
+          for (int i; i<T1_ticks.Count; i++)
+          {
+              if ((T1_ticks[i][1] == "A3034")||(T1_ticks[i][1] == "G7034")||(T1_ticks[i][1] == "A3021"))
+              {
+                  T2_ticks.Add(T1_ticks[i]);
+                  string wr2 = T1_ticks[i][0] + "," + T1_ticks[i][1] + "," + T1_ticks[i][2] + "," + T1_ticks[i][3];
+                  writer2.Flush();
+                  writer2.WriteLine(wr2);
+              }
+          }
+          
+          //T3
+          StreamWriter writer3 = new StreamWriter("C:\\User\\SE20060\\업무~\\최찬규3.csv");
+          List<List<string>> T3_ticks = new List<List<string>>();
+          foreach (var tick in T2_ticks)
+          {
+              if ((tick[1] == "A3034")||(tick[1] == "G7034"))
+              {
+                  List<string> lst = new List<string>();
+                  lst = new List<string> { tick[0], tick[3].Substring(6, 5), tick[3].Substring(11, 7) };
+                  T3_ticks.Add(lst);
+                  string wr3 = lst[0] + "," + Convert.ToDouble(lst[1]) / 100 + "," + lst[2];
+                  writer3.Flush();
+                  writer3.WriteLine(wr3);
+              }
+              else
+              {
+                  List<string> lst = new List<string>();
+                  lst = new List<string> { tick[0], tick[3].Substring(17, 9), tick[3].Substring(26, 10) };
+                  T3_ticks.Add(lst);
+                  string wr3 = lst[0] + "," + lst[1] + "," + lst[2];
+                  writer3.Flush();
+                  writer3.WriteLine(wr3);
